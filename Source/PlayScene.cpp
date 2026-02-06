@@ -19,6 +19,7 @@ PlayScene::~PlayScene()
 }
 void PlayScene::Update()
 {
+	DrawString(10, 10, "UPDATE START", GetColor(255, 0, 0));
 	stage->Update();
 
 	std::string msg;

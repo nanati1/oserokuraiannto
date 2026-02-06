@@ -1,5 +1,6 @@
-#include "App.h"
+#include "WinSockFix.h"
 #include "Network.h"
+#include "App.h"
 #include "SceneManager.h"
 #include "ObjectManager.h"
 #include "Time.h"
@@ -13,8 +14,11 @@ void AppInit()
 	SceneManager::Init();
 	Time::Init();
 
-	// ★ ここで1回だけサーバー接続
-	gNet.Connect("192.168.42.109", 50000);
+	if (!gNet.Connect("192.168.42.109", 50000)) {
+		MessageBox(nullptr, "CONNECT FAILED", "ERROR", MB_OK);
+		return;
+	}
+	MessageBox(nullptr, "AFTER CONNECT", "DEBUG", MB_OK);
 
 	SceneManager::ChangeScene("TITLE");
 
