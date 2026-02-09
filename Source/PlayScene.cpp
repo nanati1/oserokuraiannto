@@ -7,7 +7,6 @@
 
 extern Network gNet;
 
-
 PlayScene::PlayScene()
 {
 	stage = new Stage();

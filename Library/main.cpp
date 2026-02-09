@@ -3,7 +3,7 @@
 /// WinMain()から始まります
 /// </summary>
 /// <author>N.Hanai</author>
-/// 
+#include "Network.h"
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #ifdef _DEBUG
@@ -23,6 +23,15 @@
 // プログラムは WinMain から始まります
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	if (!gNet.Connect("192.168.42.109", 50000)) {
+		MessageBox(0, "サーバーに接続できません", "Error", MB_OK);
+		return -1;
+	}
+	else {
+		MessageBox(nullptr, "サーバーに接続", "DEBUG", MB_OK);
+	}
+
+
 	SetGraphMode(Screen::WIDTH, Screen::HEIGHT, 32);
 	SetOutApplicationLogValidFlag(FALSE); // ログを出さない
 

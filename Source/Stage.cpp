@@ -3,11 +3,11 @@
 #include <DxLib.h>
 
 
-extern Network gNet;
-
 #define CELL 64
 #define ORG_X 100
 #define ORG_Y 50
+
+extern Network gNet;
 
 Stage::Stage()
     : turn(BLACK), gameEnd(false)
@@ -19,33 +19,26 @@ void Stage::Update()
     int mx, my;
     GetMousePoint(&mx, &my);
 
-    // クリック → サーバー送信
-    if (GetMouseInput() & MOUSE_INPUT_LEFT) {
+    if (gNet.IsConnected() && (GetMouseInput() & MOUSE_INPUT_LEFT)) {
         int x = (mx - ORG_X) / CELL;
         int y = (my - ORG_Y) / CELL;
-
         if (x >= 0 && x < 8 && y >= 0 && y < 8) {
             gNet.Send("PUT " + std::to_string(x) + " " + std::to_string(y));
         }
     }
 
-    // ===== サーバー受信 =====
     static std::string boardStr;
+    if (!gNet.IsConnected()) return;
 
     std::string msg;
     while (gNet.Recv(msg)) {
-
-        // BOARD 開始
         if (msg.find("BOARD") != std::string::npos) {
             boardStr.clear();
             continue;
         }
 
-        // 盤面データ
         for (char c : msg) {
-            if (c == 'B' || c == 'W' || c == '.') {
-                boardStr += c;
-            }
+            if (c == 'B' || c == 'W' || c == '.') boardStr += c;
         }
 
         if (boardStr.size() >= 64) {
