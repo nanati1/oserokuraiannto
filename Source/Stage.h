@@ -7,9 +7,11 @@ public:
     Stage();
     void Update();
     void Draw();
+    void OnNetworkMessage(const std::string& msg);
+
 private:
-    Board board;          // 表示用
-    Stone turn = BLACK;   // サーバーから受信
-    bool gameEnd = false; // サーバーから受信
-    std::string result;  // サーバーから受信
+    Board board;
+    Stone turn = BLACK;
+    bool gameEnd = false;
+    std::string result;
 };

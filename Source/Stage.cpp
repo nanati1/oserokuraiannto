@@ -2,7 +2,6 @@
 #include "Stage.h"
 #include <DxLib.h>
 
-
 #define CELL 64
 #define ORG_X 100
 #define ORG_Y 50
@@ -22,29 +21,46 @@ void Stage::Update()
     if (gNet.IsConnected() && (GetMouseInput() & MOUSE_INPUT_LEFT)) {
         int x = (mx - ORG_X) / CELL;
         int y = (my - ORG_Y) / CELL;
+
         if (x >= 0 && x < 8 && y >= 0 && y < 8) {
             gNet.Send("PUT " + std::to_string(x) + " " + std::to_string(y));
         }
     }
+}
 
+void Stage::OnNetworkMessage(const std::string& msg)
+{
     static std::string boardStr;
-    if (!gNet.IsConnected()) return;
 
-    std::string msg;
-    while (gNet.Recv(msg)) {
-        if (msg.find("BOARD") != std::string::npos) {
-            boardStr.clear();
-            continue;
-        }
+    // ===== 盤面 =====
+    if (msg.find("BOARD") != std::string::npos) {
+        boardStr.clear();
+        return;
+    }
 
-        for (char c : msg) {
-            if (c == 'B' || c == 'W' || c == '.') boardStr += c;
+    for (char c : msg) {
+        if (c == 'B' || c == 'W' || c == '.') {
+            boardStr += c;
         }
+    }
 
-        if (boardStr.size() >= 64) {
-            board.SetFromString(boardStr);
-            boardStr.clear();
-        }
+    if (boardStr.size() >= 64) {
+        board.SetFromString(boardStr);
+        boardStr.clear();
+    }
+
+    // ===== ターン =====
+    if (msg.find("TURN BLACK") != std::string::npos) {
+        turn = BLACK;
+    }
+    if (msg.find("TURN WHITE") != std::string::npos) {
+        turn = WHITE;
+    }
+
+    // ===== 終了 =====
+    if (msg.find("END") != std::string::npos) {
+        gameEnd = true;
+        result = msg; // そのまま表示
     }
 }
 
@@ -54,11 +70,9 @@ void Stage::Draw()
         board.Get(3, 3) == WHITE ? "W OK" : "NO W",
         GetColor(255, 255, 0));
 
-    // 盤面描画
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
 
-            // マス
             DrawBox(
                 ORG_X + x * CELL,
                 ORG_Y + y * CELL,
@@ -68,7 +82,6 @@ void Stage::Draw()
                 TRUE
             );
 
-            // 枠線
             DrawBox(
                 ORG_X + x * CELL,
                 ORG_Y + y * CELL,
@@ -78,7 +91,6 @@ void Stage::Draw()
                 FALSE
             );
 
-            // 石
             Stone s = board.Get(x, y);
             if (s != EMPTY) {
                 DrawCircle(
@@ -92,21 +104,4 @@ void Stage::Draw()
             }
         }
     }
-
-    // ターン表示
-    if (!gameEnd) {
-        const char* text = (turn == BLACK) ? "BLACK TURN" : "WHITE TURN";
-        int color = (turn == BLACK) ? GetColor(0, 0, 0)
-            : GetColor(255, 255, 255);
-
-        DrawBox(10, 10, 210, 40, GetColor(0, 150, 0), TRUE);
-        DrawString(20, 15, text, color);
-    }
-
-    // 結果表示
-    if (gameEnd) {
-        DrawBox(150, 200, 450, 300, GetColor(0, 0, 0), TRUE);
-        DrawString(200, 230, result.c_str(), GetColor(255, 255, 255));
-    }
 }
-
