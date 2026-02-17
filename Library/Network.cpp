@@ -42,6 +42,8 @@ bool Network::Connect(const char* ip, int port) {
 
 void Network::Send(const std::string& msg) {
     if (sock == INVALID_SOCKET) return;
+
+    std::string sendMsg = msg + "\n";
     send(sock, msg.c_str(), (int)msg.size(), 0);
 }
 
@@ -64,6 +66,10 @@ bool Network::Recv(std::string& out) {
         sock = INVALID_SOCKET;
         return false;
     }
+    if (r < 0) {
+        return false;
+    }
+
 
     buf[r] = 0;
     out = buf;
