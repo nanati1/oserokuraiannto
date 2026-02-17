@@ -55,6 +55,9 @@ bool Network::Recv(std::string& out) {
     FD_SET(sock, &fds);
 
     timeval tv{};
+	tv.tv_sec = 0;
+	tv.tv_usec = 1000;
+
     int maxSock = (int)sock + 1;
     int sel = select(maxSock, &fds, nullptr, nullptr, &tv);
     if (sel <= 0) return false;

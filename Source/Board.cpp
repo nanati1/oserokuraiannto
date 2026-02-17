@@ -7,6 +7,7 @@ Board::Board() {
 }
 
 void Board::SetFromString(const std::string& s) {
+    if (s.size() < 64) return; // © ’Ç‰Á
     int idx = 0;
 
     for (char c : s) {
