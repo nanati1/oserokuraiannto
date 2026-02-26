@@ -35,17 +35,32 @@ Stage::Stage()
 
 void Stage::Update()
 {
+    static int prev = 0;
+
     int mx, my;
     GetMousePoint(&mx, &my);
 
-    if (gNet.IsConnected() && (GetMouseInput() & MOUSE_INPUT_LEFT)) {
-        int x = (mx - ORG_X) / CELL;
-        int y = (my - ORG_Y) / CELL;
+    int now = GetMouseInput();
 
-        if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+    // クリック瞬間だけ検出
+    if (gNet.IsConnected() &&
+        (now & MOUSE_INPUT_LEFT) &&
+        !(prev & MOUSE_INPUT_LEFT))
+    {
+        // 盤面内だけ
+        if (mx >= ORG_X && mx < ORG_X + 8 * CELL &&
+            my >= ORG_Y && my < ORG_Y + 8 * CELL)
+        {
+            int x = (mx - ORG_X) / CELL;
+            int y = (my - ORG_Y) / CELL;
+
+            printf("CLICK x=%d y=%d\n", x, y); // デバッグ
+
             gNet.Send("PUT " + std::to_string(x) + " " + std::to_string(y));
         }
     }
+
+    prev = now;
 }
 
 void Stage::OnNetworkMessage(const std::string& msg)
