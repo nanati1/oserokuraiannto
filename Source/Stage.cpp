@@ -31,22 +31,27 @@ void Stage::Update()
 void Stage::OnNetworkMessage(const std::string& msg)
 {
     static std::string boardStr;
+    static bool receivingBoard = false;
 
-    // ===== 盤面 =====
+    // ===== BOARD開始 =====
     if (msg.find("BOARD") != std::string::npos) {
         boardStr.clear();
-        return;
+        receivingBoard = true;
     }
 
-    for (char c : msg) {
-        if (c == 'B' || c == 'W' || c == '.') {
-            boardStr += c;
+    // ===== BOARD受信中 =====
+    if (receivingBoard) {
+        for (char c : msg) {
+            if (c == 'B' || c == 'W' || c == '.') {
+                boardStr += c;
+            }
         }
-    }
 
-    if (boardStr.size() >= 64) {
-        board.SetFromString(boardStr);
-        boardStr.clear();
+        if (boardStr.size() >= 64) {
+            board.SetFromString(boardStr);
+            boardStr.clear();
+            receivingBoard = false;
+        }
     }
 
     // ===== ターン =====
@@ -60,7 +65,7 @@ void Stage::OnNetworkMessage(const std::string& msg)
     // ===== 終了 =====
     if (msg.find("END") != std::string::npos) {
         gameEnd = true;
-        result = msg; // そのまま表示
+        result = msg;
     }
 }
 
