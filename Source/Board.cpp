@@ -1,4 +1,5 @@
 #include "Board.h"
+#include <string>
 
 Board::Board() {
     for (int y = 0; y < 8; y++)
@@ -6,12 +7,19 @@ Board::Board() {
             board[x][y] = EMPTY;
 }
 
+// š Š®‘SC³”Å
 void Board::SetFromString(const std::string& s) {
-    if (s.size() < 64) return; // © ’Ç‰Á
+    size_t pos = s.find("BOARD");
+    if (pos == std::string::npos) return;
+
     int idx = 0;
 
-    for (char c : s) {
-        if (c == '\n') continue; // ‰üs‚Í–³Ž‹
+    for (size_t i = pos; i < s.size(); i++) {
+        char c = s[i];
+
+        if (c != 'B' && c != 'W' && c != '.') continue;
+
+        if (idx >= 64) break;
 
         int x = idx % 8;
         int y = idx / 8;
@@ -21,7 +29,6 @@ void Board::SetFromString(const std::string& s) {
         else board[x][y] = EMPTY;
 
         idx++;
-        if (idx >= 64) break;
     }
 }
 
