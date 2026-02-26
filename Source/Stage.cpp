@@ -11,6 +11,26 @@ extern Network gNet;
 Stage::Stage()
     : turn(BLACK), gameEnd(false)
 {
+    //board.SetFromString(
+    //    "........"
+    //    "........"
+    //    "........"
+    //    "...WB..."
+    //    "...BW..."
+    //    "........"
+    //    "........"
+    //    "........"
+    //);
+
+    //// ←ここ！！！！
+    //if (board.Get(3, 3) == WHITE)
+    //{
+    //    printf("W OK\n");
+    //}
+    //else
+    //{
+    //    printf("NO W\n");
+    //}
 }
 
 void Stage::Update()
@@ -30,16 +50,17 @@ void Stage::Update()
 
 void Stage::OnNetworkMessage(const std::string& msg)
 {
+    printf("msg = [%s]\n", msg.c_str()); // ←これ追加
     static std::string boardStr;
     static bool receivingBoard = false;
 
-    // ===== BOARD開始 =====
+    // BOARD開始
     if (msg.find("BOARD") != std::string::npos) {
         boardStr.clear();
         receivingBoard = true;
     }
 
-    // ===== BOARD受信中 =====
+    // 受信中
     if (receivingBoard) {
         for (char c : msg) {
             if (c == 'B' || c == 'W' || c == '.') {
@@ -52,20 +73,6 @@ void Stage::OnNetworkMessage(const std::string& msg)
             boardStr.clear();
             receivingBoard = false;
         }
-    }
-
-    // ===== ターン =====
-    if (msg.find("TURN BLACK") != std::string::npos) {
-        turn = BLACK;
-    }
-    if (msg.find("TURN WHITE") != std::string::npos) {
-        turn = WHITE;
-    }
-
-    // ===== 終了 =====
-    if (msg.find("END") != std::string::npos) {
-        gameEnd = true;
-        result = msg;
     }
 }
 

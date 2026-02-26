@@ -44,10 +44,12 @@ void Network::Send(const std::string& msg) {
     if (sock == INVALID_SOCKET) return;
 
     std::string sendMsg = msg + "\n";
-    send(sock, msg.c_str(), (int)msg.size(), 0);
+    send(sock, sendMsg.c_str(), (int)sendMsg.size(), 0);
 }
 
 bool Network::Recv(std::string& out) {
+    static std::string buffer;
+
     if (sock == INVALID_SOCKET) return false;
 
     fd_set fds;
@@ -55,26 +57,28 @@ bool Network::Recv(std::string& out) {
     FD_SET(sock, &fds);
 
     timeval tv{};
-	tv.tv_sec = 0;
-	tv.tv_usec = 1000;
+    tv.tv_sec = 0;
+    tv.tv_usec = 1000;
 
-    int maxSock = (int)sock + 1;
-    int sel = select(maxSock, &fds, nullptr, nullptr, &tv);
+    int sel = select((int)sock + 1, &fds, nullptr, nullptr, &tv);
     if (sel <= 0) return false;
 
     char buf[512];
     int r = recv(sock, buf, sizeof(buf) - 1, 0);
-    if (r <= 0) {
-        closesocket(sock);
-        sock = INVALID_SOCKET;
-        return false;
-    }
-    if (r < 0) {
-        return false;
-    }
-
+    if (r <= 0) return false;
 
     buf[r] = 0;
-    out = buf;
-    return true;
+
+    // ★ 追加：バッファに貯める
+    buffer += buf;
+
+    // ★ 改行までを1メッセージとする
+    size_t pos = buffer.find('\n');
+    if (pos != std::string::npos) {
+        out = buffer.substr(0, pos);
+        buffer.erase(0, pos + 1);
+        return true;
+    }
+
+    return false;
 }
