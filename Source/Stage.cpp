@@ -37,28 +37,12 @@ void Stage::Update()
 {
     DrawFormatString(10, 520, GetColor(255, 255, 255),
         "CONNECTED=%d", gNet.IsConnected());
-    static std::string buffer;
-
-    DrawFormatString(10, 580, GetColor(255, 255, 255),
-        "BUF SIZE=%d", buffer.size());
 
     std::string msg;
-    while (gNet.Recv(msg)) {
-        buffer += msg + "\n";  // Å©ëSïîÇΩÇﬂÇÈ
-    }
 
-    // Ç‹Ç∆ÇﬂÇƒèàóù
-    size_t start = buffer.find("BOARD\n");
-    size_t end = buffer.find("END_BOARD\n");
-
-    if (start != std::string::npos && end != std::string::npos) {
-        std::string data = buffer.substr(start + 6, end - (start + 6));
-
-        if (data.size() >= 64) {
-            board.SetFromString(data.substr(0, 64));
-        }
-
-        buffer.erase(0, end + 10);
+    while (gNet.Recv(msg)) // Å© Ç±Ç±í¥èdóv
+    {
+        OnNetworkMessage(msg);
     }
 }
 

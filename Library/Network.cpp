@@ -48,6 +48,7 @@ void Network::Send(const std::string& msg) {
 }
 
 bool Network::Recv(std::string& out) {
+
     static std::string buffer;
 
     if (sock == INVALID_SOCKET) return false;
@@ -56,9 +57,9 @@ bool Network::Recv(std::string& out) {
     FD_ZERO(&fds);
     FD_SET(sock, &fds);
 
-    timeval tv;
+    timeval tv{};
     tv.tv_sec = 0;
-    tv.tv_usec = 50000; // Åö 1msÇ≠ÇÁÇ¢
+    tv.tv_usec = 50000;
 
     int sel = select((int)sock + 1, &fds, nullptr, nullptr, &tv);
     if (sel <= 0) return false;
@@ -70,12 +71,13 @@ bool Network::Recv(std::string& out) {
     buf[r] = 0;
     buffer += buf;
 
-    size_t pos = buffer.find('\n');
-    if (pos != std::string::npos) {
-        out = buffer.substr(0, pos);
-        buffer.erase(0, pos + 1);
-        return true;
-    }
+    printf("BUFFER NOW:\n%s\n", buffer.c_str());
 
-    return false;
+    // Åö ï°êîçsëŒâû
+    size_t pos = buffer.find('\n');
+    if (pos == std::string::npos) return false;
+
+    out = buffer.substr(0, pos);
+    buffer.erase(0, pos + 1);
+    return true;
 }
