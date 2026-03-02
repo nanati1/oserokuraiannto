@@ -73,28 +73,27 @@ void Stage::OnNetworkMessage(const std::string& msg)
     while (true)
     {
         size_t start = buffer.find("BOARD\n");
-        if (start == std::string::npos) break;
+        size_t end = buffer.find("END_BOARD\n");
 
-        size_t end = buffer.find("END_BOARD\n", start);
-        if (end == std::string::npos) break;
+        if (start == std::string::npos || end == std::string::npos)
+            break;
 
-        // ”Õ–Ê•”•ªæ‚èo‚µ
-        std::string boardPart =
-            buffer.substr(start + 6, end - (start + 6));
+        std::string data = buffer.substr(start + 6, end - (start + 6));
 
         std::string boardStr;
-        for (char c : boardPart)
-        {
+        for (char c : data) {
             if (c == 'B' || c == 'W' || c == '.')
                 boardStr += c;
         }
 
-        if (boardStr.size() == 64)
-        {
+        if (boardStr.size() == 64) {
             board.SetFromString(boardStr);
+            printf("BOARD OK\n");
+        }
+        else {
+            printf("BOARD NG size=%d\n", (int)boardStr.size());
         }
 
-        // ˆ—Ï‚İíœ
         buffer.erase(0, end + 10);
     }
 }
