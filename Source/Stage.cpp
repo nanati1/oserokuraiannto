@@ -11,16 +11,16 @@ extern Network gNet;
 Stage::Stage()
     : turn(BLACK), gameEnd(false)
 {
-    //board.SetFromString(
-    //    "........"
-    //    "........"
-    //    "........"
-    //    "...WB..."
-    //    "...BW..."
-    //    "........"
-    //    "........"
-    //    "........"
-    //);
+   /* board.SetFromString(
+        "........"
+        "........"
+        "........"
+        "...WB..."
+        "...BW..."
+        "........"
+        "........"
+        "........"
+    );*/
 
     //// ←ここ！！！！
     //if (board.Get(3, 3) == WHITE)
@@ -53,6 +53,8 @@ void Stage::Update()
         {
             int x = (mx - ORG_X) / CELL;
             int y = (my - ORG_Y) / CELL;
+
+            y = 7 - y; // ★これ追加（超重要）
 
             printf("CLICK x=%d y=%d\n", x, y); // デバッグ
 
@@ -100,20 +102,25 @@ void Stage::Draw()
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
 
+            int drawY = 7 - y; // ←使う！
+
+            int bx = ORG_X + x * CELL;
+            int by = ORG_Y + drawY * CELL;
+
             DrawBox(
-                ORG_X + x * CELL,
-                ORG_Y + y * CELL,
-                ORG_X + (x + 1) * CELL,
-                ORG_Y + (y + 1) * CELL,
+                bx,
+                by,
+                bx + CELL,
+                by + CELL,
                 GetColor(0, 128, 0),
                 TRUE
             );
 
             DrawBox(
-                ORG_X + x * CELL,
-                ORG_Y + y * CELL,
-                ORG_X + (x + 1) * CELL,
-                ORG_Y + (y + 1) * CELL,
+                bx,
+                by,
+                bx + CELL,
+                by + CELL,
                 GetColor(0, 0, 0),
                 FALSE
             );
@@ -121,8 +128,8 @@ void Stage::Draw()
             Stone s = board.Get(x, y);
             if (s != EMPTY) {
                 DrawCircle(
-                    ORG_X + x * CELL + CELL / 2,
-                    ORG_Y + y * CELL + CELL / 2,
+                    bx + CELL / 2,
+                    by + CELL / 2,
                     CELL / 2 - 4,
                     (s == BLACK) ? GetColor(0, 0, 0)
                     : GetColor(255, 255, 255),
