@@ -52,13 +52,22 @@ bool Network::Recv(std::string& out) {
 
     if (sock == INVALID_SOCKET) return false;
 
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(sock, &fds);
+
+    timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 50000; // Åö 1msÇ≠ÇÁÇ¢
+
+    int sel = select((int)sock + 1, &fds, nullptr, nullptr, &tv);
+    if (sel <= 0) return false;
+
     char buf[512];
     int r = recv(sock, buf, sizeof(buf) - 1, 0);
-
     if (r <= 0) return false;
 
     buf[r] = 0;
-
     buffer += buf;
 
     size_t pos = buffer.find('\n');
