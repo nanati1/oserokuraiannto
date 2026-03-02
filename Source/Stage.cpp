@@ -11,16 +11,16 @@ extern Network gNet;
 Stage::Stage()
     : turn(BLACK), gameEnd(false)
 {
-    //board.SetFromString(
-    //    "........"
-    //    "........"
-    //    "........"
-    //    "...WB..."
-    //    "...BW..."
-    //    "........"
-    //    "........"
-    //    "........"
-    //);
+    board.SetFromString(
+        "........"
+        "........"
+        "........"
+        "...WB..."
+        "...BW..."
+        "........"
+        "........"
+        "........"
+    );
 
     //// ←ここ！！！！
     //if (board.Get(3, 3) == WHITE)
@@ -76,6 +76,12 @@ void Stage::OnNetworkMessage(const std::string& msg)
                 boardStr += c;
         }
     }
+
+    if (msg == "START")
+    {
+        gameStarted = true;
+        return;
+    }
 }
 
 void Stage::Draw()
@@ -83,6 +89,18 @@ void Stage::Draw()
     DrawString(10, 480,
         board.Get(3, 3) == WHITE ? "W OK" : "NO W",
         GetColor(255, 255, 0));
+
+    if (gameStarted)
+    {
+        DrawString(300, 10, "=== START ===",
+            GetColor(255, 0, 0));
+    }
+
+    if (!gameStarted)
+    {
+        DrawString(250, 10, "WAITING FOR PLAYER...",
+            GetColor(255, 255, 0));
+    }
 
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {

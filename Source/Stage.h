@@ -8,6 +8,7 @@ public:
     void Update();
     void Draw();
     void OnNetworkMessage(const std::string& msg);
+    bool gameStarted = false;
 
 private:
     Board board;
