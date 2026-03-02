@@ -35,66 +35,62 @@ Stage::Stage()
 
 void Stage::Update()
 {
-    static int prev = 0;
+    DrawFormatString(10, 520, GetColor(255, 255, 255),
+        "CONNECTED=%d", gNet.IsConnected());
+    static std::string buffer;
 
-    int mx, my;
-    GetMousePoint(&mx, &my);
+    DrawFormatString(10, 580, GetColor(255, 255, 255),
+        "BUF SIZE=%d", buffer.size());
 
-    int now = GetMouseInput();
-
-    // クリック瞬間だけ検出
-    if (gNet.IsConnected() &&
-        (now & MOUSE_INPUT_LEFT) &&
-        !(prev & MOUSE_INPUT_LEFT))
-    {
-        // 盤面内だけ
-        if (mx >= ORG_X && mx < ORG_X + 8 * CELL &&
-            my >= ORG_Y && my < ORG_Y + 8 * CELL)
-        {
-            int x = (mx - ORG_X) / CELL;
-            int y = (my - ORG_Y) / CELL;
-
-			y = 7 - y; // 画面上はy=0が一番上だが、盤面ではy=0が一番下なので反転
-
-            printf("CLICK x=%d y=%d\n", x, y); // デバッグ
-
-            gNet.Send("PUT " + std::to_string(x) + " " + std::to_string(y));
-        }
+    std::string msg;
+    while (gNet.Recv(msg)) {
+        buffer += msg + "\n";  // ←全部ためる
     }
 
-    prev = now;
+    // まとめて処理
+    size_t start = buffer.find("BOARD\n");
+    size_t end = buffer.find("END_BOARD\n");
+
+    if (start != std::string::npos && end != std::string::npos) {
+        std::string data = buffer.substr(start + 6, end - (start + 6));
+
+        if (data.size() >= 64) {
+            board.SetFromString(data.substr(0, 64));
+        }
+
+        buffer.erase(0, end + 10);
+    }
 }
 
 void Stage::OnNetworkMessage(const std::string& msg)
 {
-    static std::string buffer;
-    buffer += msg;
+    static bool receiving = false;
+    static std::string boardStr;
 
-    while (true)
+    if (msg == "BOARD")
     {
-        size_t start = buffer.find("BOARD\n");
-        size_t end = buffer.find("END_BOARD\n");
+        boardStr.clear();
+        receiving = true;
+        return;
+    }
 
-        if (start == std::string::npos || end == std::string::npos)
-            break;
+    if (msg == "END_BOARD")
+    {
+        if (boardStr.size() == 64)
+            board.SetFromString(boardStr);
 
-        std::string data = buffer.substr(start + 6, end - (start + 6));
+        receiving = false;
+        return;
+    }
 
-        std::string boardStr;
-        for (char c : data) {
-            if (c == 'B' || c == 'W' || c == '.')
+    if (receiving)
+    {
+        // 改行や空白を除去
+        for (char c : msg)
+        {
+            if (c == '.' || c == 'B' || c == 'W')
                 boardStr += c;
         }
-
-        if (boardStr.size() == 64) {
-            board.SetFromString(boardStr);
-            printf("BOARD OK\n");
-        }
-        else {
-            printf("BOARD NG size=%d\n", (int)boardStr.size());
-        }
-
-        buffer.erase(0, end + 10);
     }
 }
 

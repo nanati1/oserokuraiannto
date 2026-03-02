@@ -58,23 +58,20 @@ bool Network::Recv(std::string& out) {
 
     timeval tv{};
     tv.tv_sec = 0;
-    tv.tv_usec = 1000;
+    tv.tv_usec = 50000;  // ← ここ重要（待たない）
 
-    int sel = select((int)sock + 1, &fds, nullptr, nullptr, &tv);
+    int sel = select(0, &fds, nullptr, nullptr, &tv);
     if (sel <= 0) return false;
 
     char buf[512];
-    int r = recv(sock, buf, sizeof(buf) - 1, 0);
+    int r = recv(sock, buf, sizeof(buf), 0);
     if (r <= 0) return false;
 
-    buf[r] = 0;
+    buffer.append(buf, r);
 
-    // ★ 追加：バッファに貯める
-    buffer += buf;
-
-    // ★ 改行までを1メッセージとする
     size_t pos = buffer.find('\n');
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
+    {
         out = buffer.substr(0, pos);
         buffer.erase(0, pos + 1);
         return true;
