@@ -23,7 +23,7 @@
 // プログラムは WinMain から始まります
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	if (!gNet.Connect("192.168.42.109", 50000)) {
+	if (!gNet.Connect("127.0.0.1", 50000)) {
 		MessageBox(0, "サーバーに接続できません", "Error", MB_OK);
 		return -1;
 	}
