@@ -72,6 +72,8 @@ bool Network::Recv(std::string& out) {
     buffer += buf;
 
     printf("BUFFER NOW:\n%s\n", buffer.c_str());
+    printf("select=%d\n", sel);
+    printf("recv=%d\n", r);
 
     // š •¡”s‘Î‰
     size_t pos = buffer.find('\n');
